@@ -31,7 +31,7 @@ class SheetHeaders {
         const column = this.find(title);
 
         if (column === null) {
-            throw new Error(`SheetHeaders: на листе "${this._sheet.getName()}" нет колонки "${title}"`);
+            throw new Error(`SheetHeaders: sheet "${this._sheet.getName()}" has no column "${title}"`);
         }
 
         return column;
@@ -82,7 +82,7 @@ class SheetHeaders {
             const sheetName = this._sheet.getName();
             const missingList = missing.map((title) => `"${title}"`).join(", ");
 
-            throw new Error(`SheetHeaders: на листе "${sheetName}" нет колонок: ${missingList}`);
+            throw new Error(`SheetHeaders: sheet "${sheetName}" has no columns: ${missingList}`);
         }
     }
 
@@ -128,7 +128,7 @@ class SheetHeaders {
      *     const columns = headers.getLazyColumns(TITLES);
      *
      *     columns.playerId;  // 4, read from the sheet right here
-     *     columns.hold;      // throws when the sheet has no "Холд" column
+     *     columns.hold;      // throws when the sheet has no "Hold" column
      *
      * @param {Object<string, string>} titleByKey - Short name to header text.
      * @returns {Object<string, number>} Short name to column number.
@@ -141,7 +141,7 @@ class SheetHeaders {
                 const title = target[key];
 
                 if (title === undefined) {
-                    throw new Error(`SheetHeaders: неизвестный ключ колонки "${String(key)}"`);
+                    throw new Error(`SheetHeaders: unknown column key "${String(key)}"`);
                 }
 
                 return this.get(title);
@@ -156,8 +156,8 @@ class SheetHeaders {
      * The row runs from the first column to the last one the header names, so
      * that writing it starts at column 1 and covers the whole header:
      *
-     *     // шапка: Partner ID | Player ID | Оплата | Холд
-     *     headers.toRow({ "Player ID": "p-1", "Оплата": 100 });
+     *     // header: Partner ID | Player ID | Payment | Hold
+     *     headers.toRow({ "Player ID": "p-1", "Payment": 100 });
      *     // [null, "p-1", 100, null]
      *
      * Columns the set says nothing about are left null, which writes an empty
@@ -169,12 +169,12 @@ class SheetHeaders {
      * the case where it does not: there the sets of columns differ on purpose,
      * and skipStrangers passes such a value over instead.
      *
-     *     // лист без колонок "Player country" и "FTD date"
-     *     headers.toRow({ "Холд": "да", "Player country": "UA", "FTD date": "" });
-     *     // Error: ... некуда записать: "Player country", "FTD date"
+     *     // a sheet without the "Player country" and "FTD date" columns
+     *     headers.toRow({ "Hold": "yes", "Player country": "UA", "FTD date": "" });
+     *     // Error: ... has nowhere to write: "Player country", "FTD date"
      *
-     *     headers.toRow({ "Холд": "да", "Player country": "UA" }, true);
-     *     // [..., "да"]
+     *     headers.toRow({ "Hold": "yes", "Player country": "UA" }, true);
+     *     // [..., "yes"]
      *
      * @param {Object<string, *>} valueByTitle - Header text to the value to
      *     put under it.
@@ -194,7 +194,7 @@ class SheetHeaders {
                 const sheetName = this._sheet.getName();
                 const missingList = missing.map((title) => `"${title}"`).join(", ");
 
-                throw new Error(`SheetHeaders: на листе "${sheetName}" некуда записать: ${missingList}`);
+                throw new Error(`SheetHeaders: sheet "${sheetName}" has nowhere to write: ${missingList}`);
             }
         }
 
@@ -216,7 +216,7 @@ class SheetHeaders {
      * so the result goes into a single setValues:
      *
      *     headers.toRows([
-     *         { "Player ID": "p-1", "Оплата": 100 },
+     *         { "Player ID": "p-1", "Payment": 100 },
      *         { "Player ID": "p-2" },
      *     ]);
      *     // [[null, "p-1", 100, null],
@@ -241,7 +241,7 @@ class SheetHeaders {
      * back:
      *
      *     headers.fromRow([42, "p-1", 100, ""]);
-     *     // { "Partner ID": 42, "Player ID": "p-1", "Оплата": 100, "Холд": "" }
+     *     // { "Partner ID": 42, "Player ID": "p-1", "Payment": 100, "Hold": "" }
      *
      * Every header gets a key, whatever the row holds, so a caller can read
      * one without checking it is there first. A row shorter than the header,
@@ -268,10 +268,10 @@ class SheetHeaders {
      *
      *     headers.fromRows([
      *         [42, "p-1", 100, ""],
-     *         [43, "p-2", 0, "да"],
+     *         [43, "p-2", 0, "yes"],
      *     ]);
-     *     // [{ "Partner ID": 42, "Player ID": "p-1", "Оплата": 100, "Холд": "" },
-     *     //  { "Partner ID": 43, "Player ID": "p-2", "Оплата": 0, "Холд": "да" }]
+     *     // [{ "Partner ID": 42, "Player ID": "p-1", "Payment": 100, "Hold": "" },
+     *     //  { "Partner ID": 43, "Player ID": "p-2", "Payment": 0, "Hold": "yes" }]
      *
      * @param {*[][]} rows - Rows as getValues returns them.
      * @returns {Object<string, *>[]} One set of named values per row.
@@ -461,9 +461,10 @@ class Model {
      * @returns {Model} The record itself.
      */
     save() {
-        // TODO: написать. Решить, пишутся ли все атрибуты подряд или только
-        // изменённые — для второго запись должна помнить, какой её прочитали.
-        throw new Error(`${this.constructor.name}.save: не реализовано`);
+        // TODO: write it. Decide whether every attribute is written in one go
+        // or only the changed ones — the latter needs the record to remember
+        // the state it was read in.
+        throw new Error(`${this.constructor.name}.save: not implemented`);
     }
 
     /**
@@ -472,10 +473,10 @@ class Model {
      * @returns {void}
      */
     delete() {
-        // TODO: написать через Manager.delete. Решить, чем становится запись
-        // после удаления: строки под ней уже съехали вверх, так что row у
-        // всех прочитанных записей врёт.
-        throw new Error(`${this.constructor.name}.delete: не реализовано`);
+        // TODO: write it through Manager.delete. Decide what the record
+        // becomes after the removal: the rows below it have already shifted
+        // up, so the row of every record read so far lies.
+        throw new Error(`${this.constructor.name}.delete: not implemented`);
     }
 
     toString() {
@@ -528,7 +529,7 @@ class SheetMeta {
         this.titles = given.titles;
         this.markerAttribute = given.markerAttribute;
         this.headerRow = given.headerRow === undefined ? DEFAULT_HEADER_ROW : given.headerRow;
-        this.firstDataRow = given.firstDataRow === undefined ? this.headeааrRow + 1 : given.firstDataRow;
+        this.firstDataRow = given.firstDataRow === undefined ? this.headerRow + 1 : given.firstDataRow;
 
         this._requireSettings();
     }
@@ -541,15 +542,15 @@ class SheetMeta {
      */
     _requireSettings() {
         if (!this.titles || Object.keys(this.titles).length === 0) {
-            throw new Error("SheetMeta: не заданы titles");
+            throw new Error("SheetMeta: titles are not set");
         }
 
         if (!this.markerAttribute) {
-            throw new Error("SheetMeta: не задан markerAttribute");
+            throw new Error("SheetMeta: markerAttribute is not set");
         }
 
         if (!(this.markerAttribute in this.titles)) {
-            throw new Error(`SheetMeta: markerAttribute "${this.markerAttribute}" не найден среди titles`);
+            throw new Error(`SheetMeta: markerAttribute "${this.markerAttribute}" was not found among titles`);
         }
     }
 
@@ -567,7 +568,7 @@ class SheetMeta {
  *     const players = new Manager(sheet, PLAYERS_META);
  *
  *     players.getAll();                    // RecordSet of Player
- *     players.updateRecord(5, { hold: "да" });
+ *     players.updateRecord(5, { hold: "yes" });
  *
  * A sheet worked with in several places is better off as a subclass holding
  * its own meta, so that no caller has to carry it:
@@ -594,7 +595,7 @@ class Manager {
      */
     constructor(sheet, meta) {
         if (!meta) {
-            throw new Error(`${this.constructor.name}: не передана meta`);
+            throw new Error(`${this.constructor.name}: meta was not given`);
         }
 
         this._sheet = sheet;
@@ -602,7 +603,7 @@ class Manager {
         this._headers = new SheetHeaders(sheet, meta.headerRow);
     }
 
-    /********** Лист и его шапка **********/
+    /********** The sheet and its header **********/
 
     /**
      * @returns {Sheet}
@@ -646,7 +647,7 @@ class Manager {
         return this._meta.firstDataRow;
     }
 
-    /********** Границы данных **********/
+    /********** Data boundaries **********/
 
     /**
      * Last row holding a record, found by the marker attribute.
@@ -685,7 +686,7 @@ class Manager {
         return lastDataRow === 0 ? 0 : lastDataRow - this.firstDataRow + 1;
     }
 
-    /********** Имена атрибутов **********/
+    /********** Attribute names **********/
 
     /**
      * Whether the model has an attribute under this name.
@@ -719,7 +720,7 @@ class Manager {
         if (unknown.length > 0) {
             const unknownList = unknown.map((name) => `"${name}"`).join(", ");
 
-            throw new Error(`${this.constructor.name}: неизвестные атрибуты: ${unknownList}`);
+            throw new Error(`${this.constructor.name}: unknown attributes: ${unknownList}`);
         }
     }
 
@@ -758,7 +759,7 @@ class Manager {
     /**
      * The records of the sheet whose attributes equal the given ones.
      *
-     *     players.filter({ campaignId: 7 }).update({ hold: "да" });
+     *     players.filter({ campaignId: 7 }).update({ hold: "yes" });
      *
      * @param {Object<string, *>} valueByAttribute - Attribute name and the
      *     value it has to equal.
@@ -771,7 +772,7 @@ class Manager {
     /**
      * The records of the sheet that filter would leave out.
      *
-     *     players.exclude({ hold: "" });  // те, у кого холд стоит
+     *     players.exclude({ hold: "" });  // the ones that are on hold
      *
      * @param {Object<string, *>} valueByAttribute - Attribute name and the
      *     value that gets a record dropped.
@@ -788,10 +789,11 @@ class Manager {
      * @returns {number} How many rows were removed.
      */
     delete(records) {
-        // TODO: написать. Строки удаляются снизу вверх, иначе номера тех, что
-        // ниже, съезжают на каждом удалении. Подряд идущие строки стоит
-        // сносить одним deleteRows, чтобы не звать лист на каждую.
-        throw new Error(`${this.constructor.name}.delete: не реализовано, records=${records}`);
+        // TODO: write it. Rows are removed bottom to top, otherwise the
+        // numbers of the ones below shift on every removal. Consecutive rows
+        // are worth dropping in a single deleteRows, so the sheet is not
+        // called for each one.
+        throw new Error(`${this.constructor.name}.delete: not implemented, records=${records}`);
     }
 
     /**
@@ -807,7 +809,7 @@ class Manager {
         return this._getColValues(this.cols[name]);
     }
 
-    /********** Запись **********/
+    /********** Writing **********/
 
     /**
      * Add records below the ones already there, all in one write.
@@ -841,7 +843,7 @@ class Manager {
      * Attributes are named the way the model names them, so a caller never
      * deals with column numbers:
      *
-     *     manager.updateRecord(5, { hold: "да", comment: "по срезу" });
+     *     manager.updateRecord(5, { hold: "yes", comment: "by the report" });
      *
      * Unlike add, the row is not rewritten whole: attributes left out keep
      * what they hold. The cells wanted are rarely next to each other, so they
@@ -892,7 +894,7 @@ class Manager {
         });
     }
 
-    /********** Внутреннее **********/
+    /********** Internals **********/
 
     /**
      * Read every row holding a record and make a record of each.
@@ -972,7 +974,7 @@ class Manager {
  *     const held = players.filter((player) => isChecked_(player.hold));
  *
  *     held.count;                        // 12
- *     held.update({ holdMonth: "май" }); // writes those 12 rows
+ *     held.update({ holdMonth: "May" }); // writes those 12 rows
  *
  * Every set is its own: two of them made from the same manager hold two
  * arrays, and writing through one says nothing about the other.
@@ -1017,7 +1019,7 @@ class RecordSet {
     /**
      * Whether the set holds anything, for asking without counting:
      *
-     *     if (!players.getAll().filter({ hold: "да" }).exists()) { ... }
+     *     if (!players.getAll().filter({ hold: "yes" }).exists()) { ... }
      *
      * @returns {boolean}
      */
@@ -1036,7 +1038,7 @@ class RecordSet {
      *
      * A set comes back, not an array, so the search goes on where it left off:
      *
-     *     players.getAll().filter({ campaignId: 7 }).update({ hold: "да" });
+     *     players.getAll().filter({ campaignId: 7 }).update({ hold: "yes" });
      *
      * @param {Object<string, *>} valueByAttribute - Attribute name and the
      *     value it has to equal.
@@ -1051,7 +1053,7 @@ class RecordSet {
      * The records that filter would leave out — the other side of the same
      * search.
      *
-     *     players.getAll().exclude({ hold: "" });  // те, у кого холд стоит
+     *     players.getAll().exclude({ hold: "" });  // the ones that are on hold
      *
      * A record matching on every attribute given is dropped; one differing in
      * any of them is kept.
@@ -1088,13 +1090,13 @@ class RecordSet {
             .join(", ");
 
         if (found.length === 0) {
-            throw new Error(`${this.constructor.name}: запись не найдена: ${asked}`);
+            throw new Error(`${this.constructor.name}: record not found: ${asked}`);
         }
 
         if (found.length > 1) {
             const rows = found.map((record) => record.row).join(", ");
 
-            throw new Error(`${this.constructor.name}: найдено записей ${found.length}: ${asked}, строки: ${rows}`);
+            throw new Error(`${this.constructor.name}: found ${found.length} records: ${asked}, rows: ${rows}`);
         }
 
         return found[0];
@@ -1107,9 +1109,9 @@ class RecordSet {
      * @returns {Model|null} Null when the set is empty.
      */
     first() {
-        // TODO: написать. Решить заодно, что значит "первый": сейчас записи
-        // лежат в порядке строк листа, но после orderBy это будет не так.
-        throw new Error(`${this.constructor.name}.first: не реализовано`);
+        // TODO: write it. Decide along the way what "first" means: records
+        // currently sit in sheet row order, but after orderBy they will not.
+        throw new Error(`${this.constructor.name}.first: not implemented`);
     }
 
     /**
@@ -1119,9 +1121,9 @@ class RecordSet {
      * @returns {RecordSet} A new set over the same manager.
      */
     orderBy(name) {
-        // TODO: написать. Продумать сравнение: на листе в одной колонке
-        // попадаются и числа, и строки, и даты, и пустые ячейки.
-        throw new Error(`${this.constructor.name}.orderBy: не реализовано, name=${name}`);
+        // TODO: write it. Think the comparison through: one column of a
+        // sheet holds numbers, strings, dates and empty cells alike.
+        throw new Error(`${this.constructor.name}.orderBy: not implemented, name=${name}`);
     }
 
     /**
@@ -1130,10 +1132,10 @@ class RecordSet {
      * @returns {number} How many rows were removed.
      */
     delete() {
-        // TODO: написать через Manager.delete. Решить, что делать с самим
-        // набором после удаления: записи в нём останутся с номерами строк,
-        // которых на листе уже нет.
-        throw new Error(`${this.constructor.name}.delete: не реализовано`);
+        // TODO: write it through Manager.delete. Decide what to do with the
+        // set itself after the removal: its records keep row numbers that the
+        // sheet no longer has.
+        throw new Error(`${this.constructor.name}.delete: not implemented`);
     }
 
     /**
@@ -1174,7 +1176,7 @@ class RecordSet {
         const wanted = Object.entries(valueByAttribute);
 
         if (wanted.length === 0) {
-            throw new Error(`${this.constructor.name}: не заданы атрибуты для поиска`);
+            throw new Error(`${this.constructor.name}: no attributes to search by were given`);
         }
 
         this._manager.requireAttributes(Object.keys(valueByAttribute));

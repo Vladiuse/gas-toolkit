@@ -2,8 +2,8 @@
  * Small helpers shared across the project.
  */
 
-const DEFAULT_MODAL_TITLE = "Сообщение";
-const DEFAULT_CONFIRM_TITLE = "Подтверждение";
+const DEFAULT_MODAL_TITLE = "Message";
+const DEFAULT_CONFIRM_TITLE = "Confirmation";
 
 // eslint-disable-next-line no-unused-vars
 function isString(value) {
@@ -51,8 +51,8 @@ function truncate(text, limit) {
  * Called with one argument it is the message itself; with two the title comes
  * first, the way a heading is written above what it heads:
  *
- *     toast("Готово");
- *     toast("Перенос холдов", "Август -> Сентябрь");
+ *     toast("Done");
+ *     toast("Moving holds", "August -> September");
  *
  * @param {string} titleOrText - Title when a text follows, the text itself
  *     otherwise.
@@ -72,7 +72,7 @@ function toast(titleOrText, text) {
  * Show a message the user has to close.
  *
  * @param {string} text - Message body.
- * @param {string} [title="Сообщение"] - Line above the text.
+ * @param {string} [title="Message"] - Line above the text.
  */
 function modal(text, title = DEFAULT_MODAL_TITLE) {
     const ui = SpreadsheetApp.getUi();
@@ -82,21 +82,21 @@ function modal(text, title = DEFAULT_MODAL_TITLE) {
 
 // eslint-disable-next-line no-unused-vars
 function modalError(text){
-    return modal(text, "Ошибка")
+    return modal(text, "Error")
 }
 
 /**
  * Ask the user a yes-or-no question and wait for the answer.
  *
  * Closing the dialog with the cross counts as a no, so the answer is true only
- * when "Да" was actually pressed:
+ * when "Yes" was actually pressed:
  *
- *     if (!modalConfirm("Удалить выбранные строки?")) {
+ *     if (!modalConfirm("Delete the selected rows?")) {
  *         return;
  *     }
  *
  * @param {string} text - Question body.
- * @param {string} [title="Подтверждение"] - Line above the text.
+ * @param {string} [title="Confirmation"] - Line above the text.
  * @returns {boolean} Whether the user agreed.
  */
 // eslint-disable-next-line no-unused-vars

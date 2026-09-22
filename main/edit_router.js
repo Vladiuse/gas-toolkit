@@ -20,9 +20,9 @@ const VALUE_CHANGE_CHECKS = {
     unchecked: (context) => !isCheckboxTicked(context.value) && isCheckboxTicked(context.oldValue),
 };
 // TODO
-// editedByUser — пропускать правки, сделанные скриптом. Твой же код пишет в ячейки (appendComment_, простановка дат), и это может поднять триггер повторно.
-// ignoreSheets — чёрный список листов. Удобно для служебных: _LOG, SlackLog, MonthlyAlertLog — их правки точно не должны ничего запускать.
-// singleCellOnly — игнорировать вставку диапазона. Сейчас при вставке 50 строк обработчик получит одно событие с диапазоном, а код рассчитан на одну ячейку (e.range.getRow() вернёт первую).
+// editedByUser — skip edits made by the script itself. Our own code writes into cells (appendComment_, stamping dates), and that can fire the trigger again.
+// ignoreSheets — a blacklist of sheets. Handy for service ones: _LOG, SlackLog, MonthlyAlertLog — edits there must never start anything.
+// singleCellOnly — ignore a range paste. Pasting 50 rows currently gives the handler a single event holding a range, while the code expects one cell (e.range.getRow() returns the first).
 
 /**
  * Routes a single onEdit event to every registered handler that matches it.
@@ -54,7 +54,7 @@ class EditRouter {
             return context.row < firstDataRow;
         }
 
-        throw new Error("Фильтр firstDataRow должен быть номером строки");
+        throw new Error("The firstDataRow filter must be a row number");
     }
 
     /**
@@ -78,7 +78,7 @@ class EditRouter {
             return Boolean(filter(context.sheetName));
         }
 
-        throw new Error("Фильтр sheet должен быть именем листа, листом или функцией");
+        throw new Error("The sheet filter must be a sheet name, a sheet or a function");
     }
 
     /**
@@ -98,7 +98,7 @@ class EditRouter {
             return filter === context.column;
         }
 
-        throw new Error("Фильтр column должен быть номером колонки или функцией");
+        throw new Error("The column filter must be a column number or a function");
     }
 
     /**
@@ -126,7 +126,7 @@ class EditRouter {
             return Boolean(filter(context));
         }
 
-        throw new Error("Фильтр customFilter должен быть функцией");
+        throw new Error("The customFilter filter must be a function");
     }
 
     /**
@@ -211,16 +211,16 @@ class EditRouter {
         } = handler;
 
         if (!name) {
-            throw new Error("У обработчика должно быть имя");
+            throw new Error("A handler must have a name");
         }
 
         if (!isFunction(run)) {
-            throw new Error("Обработчик «" + name + "»: поле run должно быть функцией");
+            throw new Error("Handler \"" + name + "\": the run field must be a function");
         }
 
         if (valueChange !== null && !VALUE_CHANGE_CHECKS[valueChange]) {
             throw new Error(
-                "Обработчик «" + name + "»: поле valueChange должно быть одним из: " + Object.keys(VALUE_CHANGE_CHECKS).join(", "),
+                "Handler \"" + name + "\": the valueChange field must be one of: " + Object.keys(VALUE_CHANGE_CHECKS).join(", "),
             );
         }
 
@@ -246,7 +246,7 @@ class EditRouter {
                     handler.run(context);
                 }
             } catch (error) {
-                this.logger.error("Обработчик «" + handler.name + "»: " + error);
+                this.logger.error("Handler \"" + handler.name + "\": " + error);
             }
         }
     }

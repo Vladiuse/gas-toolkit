@@ -57,7 +57,7 @@ class SheetStorage {
         this._requireKey(arguments.length, "set");
 
         if (arguments.length < 2) {
-            throw new Error("SheetStorage.set: нужно передать значение");
+            throw new Error("SheetStorage.set: a value must be given");
         }
 
         const storedKey = this._normalizeKey(key);
@@ -65,7 +65,7 @@ class SheetStorage {
 
         const lock = LockService.getScriptLock();
         if (!lock.tryLock(LOCK_TIMEOUT_MS)) {
-            throw new Error("SheetStorage.set: не удалось получить блокировку");
+            throw new Error("SheetStorage.set: could not acquire the lock");
         }
 
         try {
@@ -115,7 +115,7 @@ class SheetStorage {
 
         const lock = LockService.getScriptLock();
         if (!lock.tryLock(LOCK_TIMEOUT_MS)) {
-            throw new Error("SheetStorage.remove: не удалось получить блокировку");
+            throw new Error("SheetStorage.remove: could not acquire the lock");
         }
 
         try {
@@ -142,7 +142,7 @@ class SheetStorage {
     clear() {
         const lock = LockService.getScriptLock();
         if (!lock.tryLock(LOCK_TIMEOUT_MS)) {
-            throw new Error("SheetStorage.clear: не удалось получить блокировку");
+            throw new Error("SheetStorage.clear: could not acquire the lock");
         }
 
         try {
@@ -185,7 +185,7 @@ class SheetStorage {
      */
     _requireKey(argumentCount, methodName) {
         if (argumentCount < 1) {
-            throw new Error("SheetStorage." + methodName + ": нужно передать ключ");
+            throw new Error("SheetStorage." + methodName + ": a key must be given");
         }
     }
 
