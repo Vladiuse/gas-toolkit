@@ -30,6 +30,34 @@ players.add([{ "Partner ID": 43, Hold: "yes" }]);        // appended below the l
 `Manager` reads and writes it, `RecordSet` is a selection of records, `Model`
 is one row.
 
+
+## edit_router
+
+One `onEdit` split into handlers, each with the filters that decide when it
+runs. A handler that throws is logged and does not stop the others.
+
+```js
+const router = new EditRouter(logger).register({
+    name: "hold comment",
+    sheet: (name) => name.endsWith("players"),
+    column: (sheet) => new SheetHeaders(sheet).get("Hold"),
+    valueChange: "checked",
+    run: (context) => {
+        context.sheet.getRange(context.row, 5).setValue("held by " + Session.getActiveUser().getEmail());
+    },
+});
+
+function onEdit(event) {
+    router.handle(event);
+}
+```
+
+Filters: `sheet` (name, sheet or predicate), `column` (number or a function of
+the sheet), `firstDataRow` (edits above it are ignored, default 2),
+`valueChange` (`any`, `filled`, `cleared`, `checked`, `unchecked`) and
+`customFilter` for anything else. An omitted filter accepts everything.
+
+
 ## logging
 
 Writes to the execution log and to a `_LOG` sheet, colored by level. Never
@@ -57,29 +85,3 @@ storage.get("missing", "fallback"); // "fallback"
 storage.has("last_import"); // true
 storage.remove("last_import");
 ```
-
-## edit_router
-
-One `onEdit` split into handlers, each with the filters that decide when it
-runs. A handler that throws is logged and does not stop the others.
-
-```js
-const router = new EditRouter(logger).register({
-    name: "hold comment",
-    sheet: (name) => name.endsWith("players"),
-    column: (sheet) => new SheetHeaders(sheet).get("Hold"),
-    valueChange: "checked",
-    run: (context) => {
-        context.sheet.getRange(context.row, 5).setValue("held by " + Session.getActiveUser().getEmail());
-    },
-});
-
-function onEdit(event) {
-    router.handle(event);
-}
-```
-
-Filters: `sheet` (name, sheet or predicate), `column` (number or a function of
-the sheet), `firstDataRow` (edits above it are ignored, default 2),
-`valueChange` (`any`, `filled`, `cleared`, `checked`, `unchecked`) and
-`customFilter` for anything else. An omitted filter accepts everything.
